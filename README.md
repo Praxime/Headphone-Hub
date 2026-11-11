@@ -1,4 +1,4 @@
-# <img src="Assets/headphonehub.png" width="32" height="32"> | HeadphoneHub
+# <img src="https://github.com/Praxime/Headphone-Hub/releases/download/untagged-faf1fcd7153e7eb5e8d3/headphonehub.ico" width="32" height="32"> | HeadphoneHub
 HeadphoneHub is a small Windows app that plays your PC's audio through **several headphones or speakers at the same time**, for example Bluetooth earbuds together with wired headphones or a speaker. Every output gets its own volume and its own sync delay, so a slow Bluetooth connection can be lined up with a fast wired one.
 
 It's compact, animated, has light and dark mode, six accent colors, and works in **English** and **Farsi (فارسی)**.
