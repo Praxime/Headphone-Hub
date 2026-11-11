@@ -4,7 +4,7 @@ HeadphoneHub is a small Windows app that plays your PC's audio through **several
 It's compact, animated, has light and dark mode, six accent colors, and works in **English** and **Farsi (فارسی)**.
 
 <p align="center">
-  <img src="docs/screenshot.png" width="340" alt="HeadphoneHub screenshot">
+  <img src="https://github.com/Praxime/Headphone-Hub/releases/download/untagged-faf1fcd7153e7eb5e8d3/App-Showoff.png" width="340" alt="HeadphoneHub screenshot">
 </p>
 
 # ✨ | Features
@@ -25,7 +25,7 @@ Windows' default output plays the sound directly. HeadphoneHub listens to that s
 **For the best sync, make your slowest device (usually Bluetooth) the Windows default output.** Then use the delay slider on the faster devices to catch up with it.
 
 # 📥 | Download
-Grab the latest build from the [Releases](https://github.com/YOUR-USERNAME/HeadphoneHub/releases) page:
+Grab the latest build from the [Releases](https://github.com/Praxime/HeadphoneHub/releases) page:
 
 | File | What it is |
 | --- | --- |
