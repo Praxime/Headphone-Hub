@@ -3,6 +3,10 @@ HeadphoneHub is a small Windows app that plays your PC's audio through **several
 
 It's compact, animated, has light and dark mode, six accent colors, and works in **English** and **Farsi (فارسی)**.
 
+<p align="center">
+  <img src="docs/screenshot.png" width="340" alt="HeadphoneHub screenshot">
+</p>
+
 # ✨ | Features
 - **Share audio** - one switch plays whatever Windows is playing to every output you turned on
 - **Per-device volume** - 0 to 100 for each output
@@ -13,7 +17,7 @@ It's compact, animated, has light and dark mode, six accent colors, and works in
 - **Themes** - light, dark, or follow Windows (default), plus blue, red, green, yellow, orange and pink accents
 - **Dynamic app icon** - the window and taskbar icon takes the color of the selected accent
 - **Remembers everything** - devices, volumes, delays, theme, accent and language are saved between launches
-- **Installer or portable** - 64-bit and 32-bit builds of both
+- **Installer or portable** - installers for 64-bit and 32-bit Windows, plus a portable 64-bit build
 
 # 🎧 | How it works
 Windows' default output plays the sound directly. HeadphoneHub listens to that sound and mirrors it to every other output you enabled, each with its own volume and delay.
