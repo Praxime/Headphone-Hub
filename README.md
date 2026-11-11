@@ -28,7 +28,6 @@ Grab the latest build from the [Releases](https://github.com/YOUR-USERNAME/Headp
 | `HeadphoneHub-x64-Setup.exe` | Installer for 64-bit Windows |
 | `HeadphoneHub-x86-Setup.exe` | Installer for 32-bit Windows (also runs on 64-bit) |
 | `HeadphoneHub-Portable-x64.zip` | Portable, no install, 64-bit |
-| `HeadphoneHub-Portable-x86.zip` | Portable, no install, 32-bit |
 
 **Requirements:** Windows 10 (version 2004 / build 19041) or newer. Nothing else to install, the .NET runtime is included in every build.
 
