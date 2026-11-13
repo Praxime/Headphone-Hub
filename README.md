@@ -1,6 +1,6 @@
 # <p align="center"><img src="https://github.com/Praxime/Headphone-Hub/releases/download/1.0.0/headphonehub.ico" width="32" height="32"> | Headphone Hub</p>
 <p align="center"> 
-  <img alt="GitHub Downloads (all assets, all releases)" src="https://img.shields.io/github/downloads/Praxime/Headphone-Hub/total">
+  <img alt="GitHub Downloads (all assets, all releases)" src="https://img.shields.io/github/downloads/Praxime/Headphone-Hub/total?color=ffff">
   <br><img src="https://forthebadge.com/images/badges/made-with-c-sharp.svg">
 </p>
 HeadphoneHub is a small Windows app that plays your PC's audio through **several headphones or speakers at the same time**, for example Bluetooth earbuds together with wired headphones or a speaker. Every output gets its own volume and its own sync delay, so a slow Bluetooth connection can be lined up with a fast wired one.
@@ -37,11 +37,11 @@ Windows' default output plays the sound directly. HeadphoneHub listens to that s
 # 📥 | Download
 Grab the latest build from the [Releases](https://github.com/Praxime/Headphone-Hub/releases) page:
 
-| File | What it is |
-| --- | --- |
-| `HeadphoneHub-x64-Setup.exe` | Installer for 64-bit Windows |
-| `HeadphoneHub-x86-Setup.exe` | Installer for 32-bit Windows |
-| `HeadphoneHub-Portable-x64.zip` | Portable, no install, 64-bit |
+File | Arch | Link
+-- | -- | --
+| `HeadphoneHub-x64-Setup.exe` | Installer for 64-bit Windows | [Download](https://github.com/Praxime/Headphone-Hub/releases/download/1.0.0/HeadphoneHub-x64-Setup.exe) |
+| `HeadphoneHub-x86-Setup.exe` | Installer for 32-bit Windows | [Download](https://github.com/Praxime/Headphone-Hub/releases/download/1.0.0/HeadphoneHub-x86-Setup.exe) |
+| `HeadphoneHub-Portable-x64.zip` | Portable, no install, 64-bit | [Download](https://github.com/Praxime/Headphone-Hub/releases/download/1.0.0/HeadphoneHub-Portable-x64.zip) |
 
 **Requirements:** Windows 10 (version 2004 / build 19041) or newer. Nothing else to install, the .NET runtime is included in every build.
 
