@@ -44,7 +44,6 @@ public partial class MainWindow : Window
     private static readonly IEasingFunction EaseOut = new CubicEase { EasingMode = EasingMode.EaseOut };
     private static readonly IEasingFunction Spring = new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.35 };
 
-    // ---- smooth wheel scrolling -------------------------------------------------
     public static readonly DependencyProperty SmoothOffsetProperty =
         DependencyProperty.Register(nameof(SmoothOffset), typeof(double), typeof(MainWindow),
             new PropertyMetadata(0.0, (d, e) => ((MainWindow)d).Scroller.ScrollToVerticalOffset((double)e.NewValue)));
@@ -87,7 +86,6 @@ public partial class MainWindow : Window
         BeginAnimation(SmoothOffsetProperty, anim);
     }
 
-    // ---- reveal device cards when they actually come into view -------------------
     private readonly List<FrameworkElement> _pendingCards = new();
     private readonly DateTime _startedAt = DateTime.UtcNow;
     private bool _revealQueued;
@@ -115,7 +113,8 @@ public partial class MainWindow : Window
         _revealQueued = false;
         _pendingCards.RemoveAll(c => !c.IsLoaded);
         double viewport = Scroller.ViewportHeight;
-        if (_pendingCards.Count == 0) return;  // layout not ready yet: try again
+        if (_pendingCards.Count == 0) return;
+        if (viewport <= 0) { QueueReveal(); return; }
 
         bool startup = (DateTime.UtcNow - _startedAt).TotalMilliseconds < 1500;
         double baseDelay = startup ? 120 + (Stack.Children.Count - 1) * 70 : 0;
