@@ -4,6 +4,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace HeadphoneHub;
 
@@ -42,6 +43,100 @@ public partial class MainWindow : Window
 
     private static readonly IEasingFunction EaseOut = new CubicEase { EasingMode = EasingMode.EaseOut };
     private static readonly IEasingFunction Spring = new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.35 };
+
+    // ---- smooth wheel scrolling -------------------------------------------------
+    public static readonly DependencyProperty SmoothOffsetProperty =
+        DependencyProperty.Register(nameof(SmoothOffset), typeof(double), typeof(MainWindow),
+            new PropertyMetadata(0.0, (d, e) => ((MainWindow)d).Scroller.ScrollToVerticalOffset((double)e.NewValue)));
+
+    public double SmoothOffset
+    {
+        get => (double)GetValue(SmoothOffsetProperty);
+        set => SetValue(SmoothOffsetProperty, value);
+    }
+
+    private double _scrollTarget;
+    private bool _smoothing;
+    private int _scrollId;
+
+    private void OnWheel(object sender, MouseWheelEventArgs e)
+    {
+        if (Scroller.ScrollableHeight <= 0) return;
+        e.Handled = true;
+
+        double basis = _smoothing ? _scrollTarget : Scroller.VerticalOffset;
+        _scrollTarget = Math.Clamp(basis - e.Delta * 0.9, 0, Scroller.ScrollableHeight);
+
+        double from = Scroller.VerticalOffset;
+        if (Math.Abs(_scrollTarget - from) < 0.5) return;
+
+        _smoothing = true;
+        int id = ++_scrollId;
+        double target = _scrollTarget;
+        var anim = new DoubleAnimation(from, target, TimeSpan.FromMilliseconds(520))
+        {
+            EasingFunction = new QuinticEase { EasingMode = EasingMode.EaseOut }
+        };
+        anim.Completed += (_, _) =>
+        {
+            if (id != _scrollId) return;
+            BeginAnimation(SmoothOffsetProperty, null);
+            SmoothOffset = target;
+            _smoothing = false;
+        };
+        BeginAnimation(SmoothOffsetProperty, anim);
+    }
+
+    // ---- reveal device cards when they actually come into view -------------------
+    private readonly List<FrameworkElement> _pendingCards = new();
+    private readonly DateTime _startedAt = DateTime.UtcNow;
+    private bool _revealQueued;
+
+    private void OnCardLoaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement card && !_pendingCards.Contains(card)) _pendingCards.Add(card);
+        QueueReveal();
+    }
+
+    private void OnScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
+    {
+        if (_pendingCards.Count > 0) QueueReveal();
+    }
+
+    private void QueueReveal()
+    {
+        if (_revealQueued) return;
+        _revealQueued = true;
+        Dispatcher.BeginInvoke(RevealVisibleCards, DispatcherPriority.Background);
+    }
+
+    private void RevealVisibleCards()
+    {
+        _revealQueued = false;
+        _pendingCards.RemoveAll(c => !c.IsLoaded);
+        double viewport = Scroller.ViewportHeight;
+        if (_pendingCards.Count == 0 || viewport <= 0) return;
+
+        bool startup = (DateTime.UtcNow - _startedAt).TotalMilliseconds < 1500;
+        double baseDelay = startup ? 120 + (Stack.Children.Count - 1) * 70 : 0;
+        int k = 0;
+
+        foreach (var card in _pendingCards.ToList())
+        {
+            double top;
+            try { top = card.TranslatePoint(new Point(0, 0), Scroller).Y; }
+            catch { continue; }
+            if (top > viewport - 24) continue;   // still below the fold: wait until it scrolls in
+
+            _pendingCards.Remove(card);
+            var begin = TimeSpan.FromMilliseconds(baseDelay + k++ * 70);
+            card.BeginAnimation(OpacityProperty,
+                new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(380)) { BeginTime = begin });
+            if (card.RenderTransform is TranslateTransform t)
+                t.BeginAnimation(TranslateTransform.YProperty,
+                    new DoubleAnimation(18, 0, TimeSpan.FromMilliseconds(480)) { BeginTime = begin, EasingFunction = EaseOut });
+        }
+    }
 
     public MainWindow()
     {
