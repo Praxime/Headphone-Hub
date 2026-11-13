@@ -347,20 +347,43 @@ public sealed class MainViewModel : Observable, IDisposable
 
     private void BuildDevices()
     {
-        Devices.Clear();
         string? primaryId = _primary?.ID;
 
+        var wanted = new List<MMDevice>();
         foreach (var d in _enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
         {
             if (d.ID == primaryId) continue;
             if (d.FriendlyName.Contains("Hands-Free", StringComparison.OrdinalIgnoreCase)) continue;
             if (_hideVirtual && IsVirtual(d.FriendlyName)) continue;
+            wanted.Add(d);
+        }
 
-            var vm = new DeviceVM(d, DetectBluetooth(d));
-            if (_settings.Devices.TryGetValue(vm.Id, out var cfg)) vm.Load(cfg);
-            if (_batteryCache.TryGetValue(vm.Id, out var cached)) { vm.IsBluetooth = true; vm.Battery = cached; }
-            vm.Changed += OnDeviceChanged;
-            Devices.Add(vm);
+        var keep = wanted.Select(d => d.ID).ToHashSet();
+        for (int i = Devices.Count - 1; i >= 0; i--)
+        {
+            if (keep.Contains(Devices[i].Id)) continue;
+            Devices[i].Changed -= OnDeviceChanged;
+            Devices.RemoveAt(i);
+        }
+
+        int idx = 0;
+        foreach (var d in wanted)
+        {
+            var existing = Devices.FirstOrDefault(x => x.Id == d.ID);
+            if (existing == null)
+            {
+                var vm = new DeviceVM(d, DetectBluetooth(d));
+                if (_settings.Devices.TryGetValue(vm.Id, out var cfg)) vm.Load(cfg);
+                if (_batteryCache.TryGetValue(vm.Id, out var cached)) { vm.IsBluetooth = true; vm.Battery = cached; }
+                vm.Changed += OnDeviceChanged;
+                Devices.Insert(idx, vm);
+            }
+            else
+            {
+                int cur = Devices.IndexOf(existing);
+                if (cur != idx) Devices.Move(cur, idx);
+            }
+            idx++;
         }
         Raise(nameof(Status));
     }

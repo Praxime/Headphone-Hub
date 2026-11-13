@@ -115,7 +115,7 @@ public partial class MainWindow : Window
         _revealQueued = false;
         _pendingCards.RemoveAll(c => !c.IsLoaded);
         double viewport = Scroller.ViewportHeight;
-        if (_pendingCards.Count == 0 || viewport <= 0) return;
+        if (_pendingCards.Count == 0) return;  // layout not ready yet: try again
 
         bool startup = (DateTime.UtcNow - _startedAt).TotalMilliseconds < 1500;
         double baseDelay = startup ? 120 + (Stack.Children.Count - 1) * 70 : 0;
@@ -126,15 +126,16 @@ public partial class MainWindow : Window
             double top;
             try { top = card.TranslatePoint(new Point(0, 0), Scroller).Y; }
             catch { continue; }
-            if (top > viewport - 24) continue;   // still below the fold: wait until it scrolls in
+            if (top > viewport - 24) continue;
 
             _pendingCards.Remove(card);
             var begin = TimeSpan.FromMilliseconds(baseDelay + k++ * 70);
             card.BeginAnimation(OpacityProperty,
                 new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(380)) { BeginTime = begin });
-            if (card.RenderTransform is TranslateTransform t)
-                t.BeginAnimation(TranslateTransform.YProperty,
-                    new DoubleAnimation(18, 0, TimeSpan.FromMilliseconds(480)) { BeginTime = begin, EasingFunction = EaseOut });
+            var move = new TranslateTransform(0, 18);
+            card.RenderTransform = move;
+            move.BeginAnimation(TranslateTransform.YProperty,
+                new DoubleAnimation(18, 0, TimeSpan.FromMilliseconds(480)) { BeginTime = begin, EasingFunction = EaseOut });
         }
     }
 
@@ -168,6 +169,7 @@ public partial class MainWindow : Window
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         UpdateWebSwitch(animate: false);
+        QueueReveal();
         Root.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(320)));
         var pop = new DoubleAnimation(0.94, 1, TimeSpan.FromMilliseconds(480)) { EasingFunction = Spring };
         RootScale.BeginAnimation(ScaleTransform.ScaleXProperty, pop);
