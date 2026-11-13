@@ -162,11 +162,12 @@ public sealed class SpectrumView : FrameworkElement
     private readonly float[] _raw = new float[B], _cur = new float[B], _peak = new float[B];
     private readonly Brush _bg;
     private Brush _bar, _cap;
+    private Color _lastAccent, _lastCap;
     private readonly Stopwatch _clock = Stopwatch.StartNew();
 
     public SpectrumView()
     {
-        _bg = Frozen(new SolidColorBrush(Color.FromRgb(0x0D, 0x0E, 0x13)));
+        _bg = Frozen(new SolidColorBrush(Color.FromRgb(0xE6, 0xE6, 0xEC)));
         _bar = Frozen(new LinearGradientBrush(Color.FromRgb(0x8C, 0xC4, 0xFF), Color.FromRgb(0x2F, 0x6D, 0xC8), 90));
         _cap = Frozen(new SolidColorBrush(Color.FromArgb(0xB4, 0xFF, 0xFF, 0xFF)));
         RefreshTheme();
@@ -181,12 +182,20 @@ public sealed class SpectrumView : FrameworkElement
 
     private void RefreshTheme()
     {
-        Color accent = Application.Current?.Resources["Accent"] is SolidColorBrush b
-            ? b.Color
-            : Color.FromRgb(0x2F, 0x6D, 0xC8);
-        Color light = Lighten(accent, 0.45f);
-        _bar = Frozen(new LinearGradientBrush(light, accent, 90));
-        InvalidateVisual();
+        var res = Application.Current?.Resources;
+        Color accent = res?["Accent"] is SolidColorBrush b ? b.Color : Color.FromRgb(0x2F, 0x6D, 0xC8);
+        Color cap = res?["IconFg"] is SolidColorBrush c ? Color.FromArgb(0xB4, c.Color.R, c.Color.G, c.Color.B) : Color.FromArgb(0xB4, 0xFF, 0xFF, 0xFF);
+
+        if (accent != _lastAccent || _bar is null)
+        {
+            _lastAccent = accent;
+            _bar = Frozen(new LinearGradientBrush(Lighten(accent, 0.45f), accent, 90));
+        }
+        if (cap != _lastCap)
+        {
+            _lastCap = cap;
+            _cap = Frozen(new SolidColorBrush(cap));
+        }
     }
 
     private static Color Lighten(Color c, float t) => Color.FromArgb(
@@ -197,6 +206,7 @@ public sealed class SpectrumView : FrameworkElement
 
     private void OnFrame(object? sender, EventArgs e)
     {
+        RefreshTheme();
         double t = _clock.Elapsed.TotalSeconds;
         bool live = Source?.Fill(_raw) ?? false;
 

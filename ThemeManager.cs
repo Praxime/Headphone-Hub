@@ -14,7 +14,7 @@ public static class ThemeManager
         ["Bg"] = C("#F2F2F7"),        ["Card"] = C("#FFFFFF"),     ["Label"] = C("#000000"),
         ["Secondary"] = C("#8E8E93"), ["Accent"] = C("#007AFF"),   ["Green"] = C("#34C759"),
         ["Fill"] = C("#E9E9EA"),      ["Pill"] = C("#E5E5EA"),     ["PillThumb"] = C("#FFFFFF"),
-        ["IconFg"] = C("#3C3C43"),    ["Hover"] = C("#14000000"),  ["VizBg"] = C("#0D0E13"),
+        ["IconFg"] = C("#3C3C43"),    ["Hover"] = C("#14000000"),  ["VizBg"] = C("#E6E6EC"),
     };
 
     private static readonly Dictionary<string, Color> Dark = new()

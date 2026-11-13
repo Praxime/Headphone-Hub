@@ -1,4 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Net;
+using System.Net.Sockets;
+using System.Text.Json;
+using System.Windows.Media;
 using System.Windows;
 using System.Windows.Threading;
 using NAudio.CoreAudioApi;
@@ -25,6 +29,7 @@ public sealed class MainViewModel : Observable, IDisposable
 {
     private readonly MMDeviceEnumerator _enumerator = new();
     private readonly AudioEngine _engine = new();
+    private readonly WebStreamer _web = new();
     private readonly AppSettings _settings = SettingsStore.Load();
     private readonly DispatcherTimer _batteryTimer = new() { Interval = TimeSpan.FromSeconds(20) };
     private readonly DispatcherTimer _debounce = new() { Interval = TimeSpan.FromMilliseconds(700) };
@@ -33,6 +38,8 @@ public sealed class MainViewModel : Observable, IDisposable
     private readonly Dictionary<string, int> _batteryCache = new();
     private MMDevice? _primary;
     private bool _running, _hideVirtual;
+    private string _webState = "Off", _webUrl = "";
+    private int _webVolume, _webPort;
     private string? _hintKey;
     private object[] _hintArgs = Array.Empty<object>();
     private readonly SpectrumAnalyzer _spectrum = new();
@@ -40,6 +47,12 @@ public sealed class MainViewModel : Observable, IDisposable
     public MainViewModel()
     {
         _hideVirtual = _settings.HideVirtual;
+        _webVolume = Math.Clamp(_settings.WebVolume, 0, 100);
+        _web.Volume = _webVolume / 100f;
+        _webPort = _settings.WebPort is >= 1024 and <= 65535 ? _settings.WebPort : 0;
+        ThemeManager.Changed += PushTheme;
+        _web.ListenersChanged += () =>
+            Application.Current?.Dispatcher.BeginInvoke(() => Raise(nameof(WebSub)));
         Loc.I.Lang = _settings.Lang;
         ThemeManager.SetAccentName(_settings.Accent, animate: false);
         ThemeManager.SetMode(_settings.Theme, animate: false);
@@ -74,6 +87,166 @@ public sealed class MainViewModel : Observable, IDisposable
         VirtualMarkers.Any(m => name.Contains(m, StringComparison.OrdinalIgnoreCase));
 
     public SpectrumAnalyzer Spectrum => _spectrum;
+
+    public string WebState
+    {
+        get => _webState;
+        private set
+        {
+            if (!Set(ref _webState, value)) return;
+            Raise(nameof(WebEnabled));
+            Raise(nameof(WebSub));
+            Raise(nameof(Status));
+        }
+    }
+
+    public bool WebEnabled => _webState == "On";
+    public string WebUrl => _webUrl;
+    public string WebVolumeText => Loc.I.Num(_webVolume) + Loc.I.Pct;
+
+    public int WebVolume
+    {
+        get => _webVolume;
+        set
+        {
+            if (!Set(ref _webVolume, Math.Clamp(value, 0, 100))) return;
+            _web.Volume = _webVolume / 100f;
+            _settings.WebVolume = _webVolume;
+            SettingsStore.Save(_settings);
+            Raise(nameof(WebVolumeText));
+        }
+    }
+
+    public string WebPortText
+    {
+        get => _webPort == 0 ? "" : _webPort.ToString();
+        set
+        {
+            int port = 0;
+            var text = (value ?? "").Trim();
+            if (text.Length > 0 && (!int.TryParse(text, out port) || port is < 1024 or > 65535))
+            {
+                SetHint("WebPortInvalid");
+                Application.Current.Dispatcher.BeginInvoke(() => Raise(nameof(WebPortText)));
+                return;
+            }
+            if (port == _webPort)
+            {
+                Application.Current.Dispatcher.BeginInvoke(() => Raise(nameof(WebPortText)));
+                return;
+            }
+
+            _webPort = port;
+            _settings.WebPort = port;
+            SettingsStore.Save(_settings);
+            SetHint(null);
+            Raise();
+            if (_webState == "On") _ = RestartWebAsync();
+        }
+    }
+
+    public void UseRandomPort() => WebPortText = "";
+
+    public string WebSub => _webState switch
+    {
+        "Busy" => Loc.I["WebStarting"],
+        "On" => _web.ListenerCount == 0
+            ? Loc.I["WebNobody"]
+            : Loc.I.Format("WebListeners", Loc.I.Num(_web.ListenerCount)),
+        _ => Loc.I["WebIdle"]
+    };
+
+    private void PushTheme()
+    {
+        var res = Application.Current.Resources;
+        string Hex(string key) => res[key] is SolidColorBrush b ? $"#{b.Color.R:X2}{b.Color.G:X2}{b.Color.B:X2}" : "#000000";
+
+        _web.SetTheme(JsonSerializer.Serialize(new Dictionary<string, object>
+        {
+            ["dark"] = ThemeManager.IsDark,
+            ["bg"] = Hex("Bg"),
+            ["card"] = Hex("Card"),
+            ["fg"] = Hex("Label"),
+            ["sub"] = Hex("Secondary"),
+            ["fill"] = Hex("Fill"),
+            ["accent"] = Hex("Accent"),
+            ["viz"] = Hex("VizBg")
+        }));
+    }
+
+    public event Action? PortPromptRequested;
+
+    public async void ToggleWeb()
+    {
+        if (_webState == "Busy") return;
+        if (_webState == "On") { StopWeb(); return; }
+        if (PortPromptRequested != null) { PortPromptRequested.Invoke(); return; }
+        await StartWebAsync();
+    }
+
+    public string SavedPortText => _webPort == 0 ? "" : _webPort.ToString();
+
+    public bool TryParsePort(string? text, out int port)
+    {
+        port = 0;
+        return int.TryParse((text ?? "").Trim(), out port) && port is >= 1024 and <= 65535;
+    }
+
+    public async void StartWebOnPort(int port)
+    {
+        if (_webState != "Off") return;
+        _webPort = port;
+        _settings.WebPort = port;
+        SettingsStore.Save(_settings);
+        Raise(nameof(WebPortText));
+        await StartWebAsync();
+    }
+
+    private async Task StartWebAsync()
+    {
+        WebState = "Busy";
+        SetHint(null);
+        PushTheme();
+        try
+        {
+            var start = Task.Run(() => (Port: _web.Start(_webPort), Address: LocalNetwork.FindAddress()));
+            await Task.WhenAll(start, Task.Delay(700));
+            var (port, address) = start.Result;
+
+            _webUrl = $"http://{address ?? IPAddress.Loopback}:{port}";
+            Raise(nameof(WebUrl));
+            _engine.AttachWeb(_web);
+            WebState = "On";
+            if (address == null) SetHint("WebNoNetwork");
+        }
+        catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AddressAlreadyInUse)
+        {
+            _web.Stop();
+            WebState = "Off";
+            SetHint("WebPortBusy", _webPort);
+        }
+        catch (Exception ex)
+        {
+            _web.Stop();
+            WebState = "Off";
+            SetHint("WebFailed", ex.Message);
+        }
+    }
+
+    private async Task RestartWebAsync()
+    {
+        _engine.AttachWeb(null);
+        _web.Stop();
+        await StartWebAsync();
+    }
+
+    private void StopWeb()
+    {
+        _engine.AttachWeb(null);
+        _web.Stop();
+        WebState = "Off";
+        SetHint(null);
+    }
 
     public string PrimaryName => _primary?.FriendlyName ?? Loc.I["NoDevice"];
     public string Info => _primary == null ? "" : Loc.I["Info"];
@@ -119,6 +292,8 @@ public sealed class MainViewModel : Observable, IDisposable
         Raise(nameof(PrimaryName));
         Raise(nameof(Info));
         Raise(nameof(Hint));
+        Raise(nameof(WebSub));
+        Raise(nameof(WebVolumeText));
         foreach (var d in Devices) d.RefreshLoc();
     }
 
@@ -147,7 +322,7 @@ public sealed class MainViewModel : Observable, IDisposable
     }
 
     public string Status => IsRunning
-        ? Loc.I.Format("Sharing", Loc.I.Num(Devices.Count(d => d.Enabled)))
+        ? Loc.I.Format("Sharing", Loc.I.Num(Devices.Count(d => d.Enabled) + (WebEnabled ? 1 : 0)))
         : Loc.I["Stopped"];
 
     public void Refresh()
@@ -206,7 +381,7 @@ public sealed class MainViewModel : Observable, IDisposable
     private bool StartEngine()
     {
         if (_primary == null) { SetHint("NoDefault"); return false; }
-        if (!Devices.Any(d => d.Enabled)) { SetHint("EnableOne"); return false; }
+        if (!Devices.Any(d => d.Enabled) && !WebEnabled) { SetHint("EnableOne"); return false; }
 
         try
         {
@@ -255,10 +430,12 @@ public sealed class MainViewModel : Observable, IDisposable
 
     public void Dispose()
     {
+        ThemeManager.Changed -= PushTheme;
         _batteryTimer.Stop();
         _debounce.Stop();
         try { _enumerator.UnregisterEndpointNotificationCallback(_watcher); } catch { }
         _engine.Dispose();
+        _web.Dispose();
         _spectrum.Dispose();
     }
 }

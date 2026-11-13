@@ -18,11 +18,27 @@ public sealed class AudioEngine : IDisposable
 
     public bool IsRunning => _capture != null;
 
+    public WebStreamer? Web { get; private set; }
+
+    public void AttachWeb(WebStreamer? web)
+    {
+        Web = web;
+        var cap = _capture;
+        if (web != null && cap != null) web.SetFormat(FormatOf(cap.WaveFormat));
+    }
+
+    private static PcmFormat FormatOf(WaveFormat format)
+    {
+        var std = format is WaveFormatExtensible ext ? ext.ToStandardWaveFormat() : format;
+        return new PcmFormat(std.SampleRate, std.Channels, std.BitsPerSample, std.Encoding == WaveFormatEncoding.IeeeFloat);
+    }
+
     public void Start(MMDevice source, IEnumerable<DeviceVM> targets)
     {
         Stop();
         _capture = new WasapiLoopbackCapture(source);
         _capture.DataAvailable += OnData;
+        Web?.SetFormat(FormatOf(_capture.WaveFormat));
 
         foreach (var t in targets.Where(t => t.Enabled))
             AddRoute(t);
@@ -39,6 +55,7 @@ public sealed class AudioEngine : IDisposable
             cap.DataAvailable -= OnData;
             try { cap.StopRecording(); } catch { }
             cap.Dispose();
+            Web?.ClearFormat();
         }
 
         lock (_gate)
@@ -77,6 +94,8 @@ public sealed class AudioEngine : IDisposable
 
     private void OnData(object? sender, WaveInEventArgs e)
     {
+        Web?.Push(e.Buffer, e.BytesRecorded);
+
         lock (_gate)
         {
             foreach (var r in _routes.Values)

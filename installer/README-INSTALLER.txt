@@ -3,7 +3,9 @@ HeadphoneHub installer (NSIS)
 1. Install NSIS 3 from https://nsis.sourceforge.io (makensis.exe).
 2. From the project folder run:
      powershell -ExecutionPolicy Bypass -File installer\build-installer.ps1
-   Optionally pass a build number: -Build 3
+   Optionally pass a version: -Version 1.1.0   (default 1.1.0; use x.y.z or x.y.z.w)
+   The version is shown in the installer, its file properties, "Apps & features" and is
+   also passed to dotnet publish (-p:Version) so the app .exe carries it too.
    For 32-bit Windows (x86) add: -Arch x86   (default is x64)
    It publishes the app self-contained (the .NET runtime is inside, nothing to install
    separately) and builds artifacts\HeadphoneHub-x64-Setup.exe (or HeadphoneHub-x86-Setup.exe with -Arch x86).
@@ -15,7 +17,7 @@ What the installer does
   - Installer, shortcuts and the .exe use the white-on-black headphone icon (Assets\headphonehub.ico);
     while the app is running, its window/taskbar icon recolors the headphones to whichever accent
     color the user picks (AppIcon.cs).
-  - Silent install: HeadphoneHub-Setup-buildN.exe /S
+  - Silent install: HeadphoneHub-x64-Setup.exe /S
   - Settings are not installed: HeadphoneHub creates %LocalAppData%\HeadphoneHub\settings.json
     by itself with its defaults on first start.
 

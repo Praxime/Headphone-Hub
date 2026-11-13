@@ -7,8 +7,11 @@ SetCompressor /SOLID lzma
 !include "WinVer.nsh"
 !include "FileFunc.nsh"
 
-!ifndef APP_BUILD
-  !define APP_BUILD "1"
+!ifndef APP_VERSION
+  !define APP_VERSION "1.1.0"
+!endif
+!ifndef VI_VERSION
+  !define VI_VERSION "${APP_VERSION}.0"
 !endif
 !ifndef ARCH
   !define ARCH "x64"
@@ -40,14 +43,14 @@ OutFile "${OUT_FILE}"
 !endif
 InstallDirRegKey HKLM "Software\${APP_NAME}" "InstallDir"
 RequestExecutionLevel admin
-BrandingText "${APP_NAME} build ${APP_BUILD}"
+BrandingText "${APP_NAME} ${APP_VERSION}"
 
-VIProductVersion "1.0.0.${APP_BUILD}"
+VIProductVersion "${VI_VERSION}"
 VIAddVersionKey "ProductName" "${APP_NAME}"
 VIAddVersionKey "LegalCopyright" "${APP_NAME}"
 VIAddVersionKey "FileDescription" "${APP_NAME} installer"
-VIAddVersionKey "FileVersion" "build ${APP_BUILD}"
-VIAddVersionKey "ProductVersion" "build ${APP_BUILD}"
+VIAddVersionKey "FileVersion" "${APP_VERSION}"
+VIAddVersionKey "ProductVersion" "${APP_VERSION}"
 
 !define MUI_ICON "${ICON_FILE}"
 !define MUI_UNICON "${ICON_FILE}"
@@ -114,7 +117,7 @@ Section "${APP_NAME}" SecApp
 
   WriteRegStr HKLM "Software\${APP_NAME}" "InstallDir" "$INSTDIR"
   WriteRegStr HKLM "${UNINST_KEY}" "DisplayName" "${APP_NAME}"
-  WriteRegStr HKLM "${UNINST_KEY}" "DisplayVersion" "build ${APP_BUILD}"
+  WriteRegStr HKLM "${UNINST_KEY}" "DisplayVersion" "${APP_VERSION}"
   WriteRegStr HKLM "${UNINST_KEY}" "Publisher" "${APP_NAME}"
   WriteRegStr HKLM "${UNINST_KEY}" "DisplayIcon" "$INSTDIR\headphonehub.ico"
   WriteRegStr HKLM "${UNINST_KEY}" "InstallLocation" "$INSTDIR"

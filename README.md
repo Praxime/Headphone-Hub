@@ -17,6 +17,12 @@ It's compact, animated, has light and dark mode, six accent colors, and works in
 - **Per-device sync delay** - 0 to 1000 ms, to line up Bluetooth with wired devices
 - **Bluetooth battery** - shown next to each device when Windows reports it
 - **Device list** - outputs are labelled Bluetooth or Wired, and virtual devices can be hidden
+- **Web output** - stream the desktop audio to any browser on your local network, with a QR code to open it from your phone. The page has a live spectrum, follows the app's light / dark mode and accent color in real time, and speaks English and Farsi
+
+  <video src="https://github.com/Praxime/Headphone-Hub/releases/download/untagged-b620493b7223095d3ef4/Headphonehub-Webpage.1.mp4" controls muted width="340"></video>
+
+  [▶ Watch the Web output demo](https://github.com/Praxime/Headphone-Hub/releases/download/untagged-b620493b7223095d3ef4/Headphonehub-Webpage.1.mp4)
+
 - **Live spectrum** - a small visualizer that shows sound is flowing
 - **Themes** - light, dark, or follow Windows (default), plus blue, red, green, yellow, orange and pink accents
 - **Dynamic app icon** - the window and taskbar icon takes the color of the selected accent
@@ -29,7 +35,7 @@ Windows' default output plays the sound directly. HeadphoneHub listens to that s
 **For the best sync, make your slowest device (usually Bluetooth) the Windows default output.** Then use the delay slider on the faster devices to catch up with it.
 
 # 📥 | Download
-Grab the latest build from the [Releases](https://github.com/Praxime/HeadphoneHub/releases) page:
+Grab the latest build from the [Releases](https://github.com/Praxime/Headphone-Hub/releases) page:
 
 | File | What it is |
 | --- | --- |
@@ -45,6 +51,9 @@ Grab the latest build from the [Releases](https://github.com/Praxime/HeadphoneHu
 3. Set a volume for each one
 4. If a device is late or early, adjust its **Delay (sync)**
 5. Turn on **Share audio**
+
+To listen on a phone, turn on the **Web** output. A window asks for the port: press **Use a random port** to start right away, or type your own (1024 to 65535) and press **Enter** (button or keyboard) to keep it fixed. You can still change the port later in the Port box. Then tap the QR button and scan it. The phone has to be on the same Wi-Fi / network as the PC. The audio plays when **Share audio** is on. If the page doesn't open, allow HeadphoneHub through Windows Firewall on private networks.
+⚠️ If webpage does not open for you on some local addresses, Please turn off any Tunnel/VPN running on your computer.
 
 Use the sun / moon / monitor button for light, dark or system theme, the colored dots to change the accent, and the language switch for English or Farsi.
 

@@ -75,6 +75,8 @@ public sealed class AppSettings
     public string Lang { get; set; } = "en";
     public string Theme { get; set; } = "system";
     public string Accent { get; set; } = "blue";
+    public int WebVolume { get; set; } = 100;
+    public int WebPort { get; set; }
     public Dictionary<string, DeviceSetting> Devices { get; set; } = new();
 }
 
