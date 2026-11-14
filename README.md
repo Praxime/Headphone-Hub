@@ -39,9 +39,9 @@ Grab the latest build from the [Releases](https://github.com/Praxime/Headphone-H
 
 File | Arch | Link
 -- | -- | --
-| `HeadphoneHub-x64-Setup.exe` | Installer for 64-bit Windows | [Download](https://github.com/Praxime/Headphone-Hub/releases/download/1.0.0/HeadphoneHub-x64-Setup.exe) |
-| `HeadphoneHub-x86-Setup.exe` | Installer for 32-bit Windows | [Download](https://github.com/Praxime/Headphone-Hub/releases/download/1.0.0/HeadphoneHub-x86-Setup.exe) |
-| `HeadphoneHub-Portable-x64.zip` | Portable, no install, 64-bit | [Download](https://github.com/Praxime/Headphone-Hub/releases/download/1.0.0/HeadphoneHub-Portable-x64.zip) |
+| `HeadphoneHub-x64-Setup.exe` | Installer for 64-bit Windows | [Download](https://github.com/Praxime/Headphone-Hub/releases/download/1.1.1/HeadphoneHub-x64-Setup.exe) |
+| `HeadphoneHub-x86-Setup.exe` | Installer for 32-bit Windows | [Download](https://github.com/Praxime/Headphone-Hub/releases/download/1.1.1/HeadphoneHub-x86-Setup.exe) |
+| `HeadphoneHub-Portable-x64.zip` | Portable, no install, 64-bit | [Download](https://github.com/Praxime/Headphone-Hub/releases/download/1.1.1/HeadphoneHub-Portable-x64.zip) |
 
 **Requirements:** Windows 10 (version 2004 / build 19041) or newer. Nothing else to install, the .NET runtime is included in every build.
 
