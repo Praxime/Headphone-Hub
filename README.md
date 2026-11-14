@@ -21,7 +21,7 @@ It's compact, animated, has light and dark mode, six accent colors, and works in
 
   <video src="https://github.com/Praxime/Headphone-Hub/releases/download/untagged-b620493b7223095d3ef4/Headphonehub-Webpage.1.mp4" controls muted width="340"></video>
 
-  [▶ Watch the Web output demo](https://github.com/Praxime/Headphone-Hub/releases/download/untagged-b620493b7223095d3ef4/Headphonehub-Webpage.1.mp4)
+  [▶ Watch the Web output demo](https://release-assets.githubusercontent.com/github-production-release-asset/1453611140/625815d2-fea5-4864-851f-d7637ba15033?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-11-14T01%3A33%3A57Z&rscd=attachment%3B+filename%3DHeadphonehub-Webpage.1.mp4&rsct=application%2Foctet-stream&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-11-14T00%3A33%3A19Z&ske=2026-11-14T01%3A33%3A57Z&sks=b&skv=2018-11-09&sig=EztslO6uCPUsxk%2B7CH2x6eSFMv1QfvrTGEHhns3gC9w%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc5NDYxODE5OSwibmJmIjoxNzk0NjE2Mzk5LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.gmx3M5aPmgDl1VTOQOzl2aMaP__UwoVV6_3KmqQAS08&response-content-disposition=attachment%3B%20filename%3DHeadphonehub-Webpage.1.mp4&response-content-type=application%2Foctet-stream)
 
 - **Live spectrum** - a small visualizer that shows sound is flowing
 - **Themes** - light, dark, or follow Windows (default), plus blue, red, green, yellow, orange and pink accents
