@@ -266,6 +266,11 @@ public sealed class WebStreamer : IDisposable
             {
                 await Respond(stream, "200 OK", "text/html; charset=utf-8", WebPage.Render(_themeJson), ct);
             }
+            else if (path == "/lame.js" || path == "/mux.js")
+            {
+                var script = WebPage.Asset(path == "/lame.js" ? "web/lame.min.js" : "web/hhmux.js");
+                await Respond(stream, script.Length > 0 ? "200 OK" : "404 Not Found", "text/javascript; charset=utf-8", script, ct);
+            }
             else if (path == "/favicon.ico")
             {
                 await Respond(stream, "204 No Content", "image/x-icon", Array.Empty<byte>(), ct);

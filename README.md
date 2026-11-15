@@ -18,6 +18,7 @@ It's compact, animated, has light and dark mode, six accent colors, and works in
 - **Bluetooth battery** - shown next to each device when Windows reports it
 - **Device list** - outputs are labelled Bluetooth or Wired, and virtual devices can be hidden
 - **Web output** - stream the desktop audio to any browser on your local network, with a QR code to open it from your phone. The page has a live spectrum, follows the app's light / dark mode and accent color in real time, and speaks English and Farsi
+- **Record from the web page** - the page can record the shared audio as **OGG** or **WAV**, or record a video of the live spectrum and theme colors as **MP4** or **MKV**. Tap **Tap to listen** first, pick a format, press **Record**, and press it again to stop: the file downloads automatically. For MP4 / MKV a settings window blurs the page first and asks for the **frame rate** (30 recommended, or 60), **audio bitrate** (64 / 92 / 128 / 192 / 256 / 320 kbps), **sample rate** (44100 Hz recommended, or 48000 Hz) and **video bitrate** (6000 kbps recommended, you can type your own). Video files are H.264 + MP3 with a real index and duration, so they play and seek in the default Windows player, KMPlayer, Discord, VLC and on phones. MP4 and OGG/MKV availability depends on the browser (Chrome / Edge: OGG, MKV and MP4; Firefox: OGG and MKV; Safari: MP4 and WAV); unsupported formats are greyed out. WAV is always available. Keep the page open and on screen while recording a video
 
   <video src="https://github.com/Praxime/Headphone-Hub/releases/download/untagged-b620493b7223095d3ef4/Headphonehub-Webpage.1.mp4" controls muted width="340"></video>
 
@@ -94,6 +95,7 @@ Use **Apps & features** in Windows settings, or run `Uninstall.exe` from the ins
 # 🧰 | Built with
 - C# / .NET 8 / WPF
 - [NAudio](https://github.com/naudio/NAudio) for audio capture and playback
+- [lamejs](https://github.com/zhuker/lamejs) (LGPL-3.0, patched to keep the chosen sample rate) for the MP3 audio in recorded videos
 - [Vazirmatn](https://github.com/rastikerdar/vazirmatn) font for Farsi (SIL Open Font License)
 - [NSIS](https://nsis.sourceforge.io) for the installer
 

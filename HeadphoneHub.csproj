@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Resource Include="Fonts\*.ttf" />
+    <EmbeddedResource Include="Assets\web\*.js" LogicalName="web/%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>
