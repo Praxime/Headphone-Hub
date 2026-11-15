@@ -31,7 +31,7 @@ public static class ThemeManager
         ["red"] = (C("#FF3B30"), C("#FF453A")),
         ["green"] = (C("#34C759"), C("#30D158")),
         ["yellow"] = (C("#FFCC00"), C("#FFD60A")),
-        ["orange"] = (C("#FF9500"), C("#FF9F0A")),
+        ["orange"] = (C("#FF5E1A"), C("#FF6B2C")),
         ["pink"] = (C("#FF2D55"), C("#FF375F")),
     };
 
