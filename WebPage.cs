@@ -8,7 +8,6 @@ internal static class WebPage
     public static byte[] Render(string? themeJson) =>
         Encoding.UTF8.GetBytes(Source.Replace("__THEME__", themeJson ?? "null"));
 
-    // Scripts the page loads only when a video recording is started (MP3 encoder and the MP4/MKV muxer).
     public static byte[] Asset(string name)
     {
         using var stream = typeof(WebPage).Assembly.GetManifestResourceStream(name);
@@ -245,7 +244,6 @@ button.stop{background:var(--fill);color:var(--fg)}
   var connected = false, everConnected = false, live = false, listening = false;
   var rec = null, tick = 0;
 
-  // Changing text fades the new words in softly instead of snapping.
   var swapped = false;
   function swap(el, txt, lift) {
     if (el.textContent === txt) return;
@@ -276,8 +274,6 @@ button.stop{background:var(--fill);color:var(--fg)}
   var freq = null, edges = null;
   var raw = new Float32Array(B), cur = new Float32Array(B), peak = new Float32Array(B);
 
-  // The audio engine is shared by listening and recording, so recording also
-  // works while the phone itself stays silent.
   function ensureEngine() {
     if (ctx) { ctx.resume(); return true; }
     var Ctx = window.AudioContext || window.webkitAudioContext;
@@ -383,7 +379,6 @@ button.stop{background:var(--fill);color:var(--fg)}
     c.closePath();
   }
 
-  // Draws the spectrum panel into any 2D context (the page and the video recording share it).
   function drawViz(c, w, h, k) {
     c.fillStyle = css(pal.viz);
     pill(c, 0, 0, w, h, 20 * k);
@@ -414,8 +409,6 @@ button.stop{background:var(--fill);color:var(--fg)}
     }
   }
 
-  // ---------- recording ----------
-
   var MR = typeof MediaRecorder !== 'undefined' ? MediaRecorder : null;
   var PLAN = {};
 
@@ -437,7 +430,6 @@ button.stop{background:var(--fill);color:var(--fg)}
     m = allTypes(['audio/ogg;codecs=opus', 'audio/ogg']);
     if (m.length) PLAN.ogg = { ext: 'ogg', mime: 'audio/ogg', recs: m, fix: null };
     else {
-      // Chrome / Edge record WebM-Opus; the Opus packets are re-wrapped into a real Ogg file.
       m = allTypes(['audio/webm;codecs=opus', 'audio/webm']);
       if (m.length) PLAN.ogg = { ext: 'ogg', mime: 'audio/ogg', recs: m, fix: 'ogg' };
     }
@@ -445,15 +437,11 @@ button.stop{background:var(--fill);color:var(--fg)}
     var canCanvas = !!(window.HTMLCanvasElement && HTMLCanvasElement.prototype.captureStream);
     if (!canCanvas) return;
 
-    // Video is recorded without sound by MediaRecorder; the page then builds the MP4 / MKV itself
-    // (H.264 video copied as it is, MP3 audio encoded from the PCM the PC sends) so the files have a
-    // real index and play and seek everywhere, including the default Windows player.
     var h264 = allTypes(['video/x-matroska;codecs=avc1', 'video/x-matroska;codecs=h264', 'video/webm;codecs=h264', 'video/webm;codecs=avc1']);
     var other = allTypes(['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm;codecs=av1', 'video/webm']);
 
     if (h264.length) PLAN.mp4 = { ext: 'mp4', mime: 'video/mp4', recs: h264, video: true, mux: 'mp4' };
     else {
-      // Safari records MP4 with AAC audio natively.
       var apple = /Apple/.test(navigator.vendor || '') && !/Chrome|Chromium|Edg|Android/.test(navigator.userAgent || '');
       m = allTypes(apple ? ['video/mp4;codecs=avc1.640028,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2', 'video/mp4']
                          : ['video/mp4;codecs=avc1.640028,mp4a.40.2', 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2']);
@@ -471,7 +459,6 @@ button.stop{background:var(--fill);color:var(--fg)}
   var fmtsEl = $('fmts'), rbtn = $('rbtn'), rlabel = $('rlabel');
   var fmtBtns = fmtsEl.querySelectorAll('button');
 
-  // A highlight that glides to the chosen option instead of swapping instantly.
   (function () {
     var all = document.querySelectorAll('.seg');
     for (var i = 0; i < all.length; i++) {
@@ -540,8 +527,6 @@ button.stop{background:var(--fill);color:var(--fg)}
                        : text.recStop + ' · ' + fmtTime(elapsed()) + ' · ' + fmtSize(rec.bytes);
   }
 
-  // WAV is written straight from the PCM the PC sends (lossless), placed on the same
-  // timeline as the playback so gaps in the stream become silence like in the other formats.
   function resample(pcm, a, b) {
     var n = pcm.length >> 1, m = Math.max(1, Math.round(n * b / a)), out = new Int16Array(m * 2);
     for (var i = 0; i < m; i++) {
@@ -584,7 +569,6 @@ button.stop{background:var(--fill);color:var(--fg)}
     return new Blob([h.buffer].concat(w.parts), { type: 'audio/wav' });
   }
 
-  // --- WebM (Opus) -> Ogg Opus ---
   function ebmlId(u, p) {
     var b = u[p], n = b >= 0x80 ? 1 : b >= 0x40 ? 2 : b >= 0x20 ? 3 : 4, id = 0;
     for (var i = 0; i < n; i++) id = id * 256 + u[p + i];
@@ -692,14 +676,11 @@ button.stop{background:var(--fill);color:var(--fg)}
     return blob.arrayBuffer().then(function (ab) { return muxOgg(new Uint8Array(ab)); });
   }
 
-  // --- video frame (same card look + live spectrum + live theme colors) ---
   var rcv = null, rg = null, statC = null, statVer = -1, iconPath = null;
   try { iconPath = new Path2D('M3,18 V12 A9,9 0 0 1 21,12 V18 M21,19 A2,2 0 0 1 19,21 H18 A2,2 0 0 1 16,19 V16 A2,2 0 0 1 18,14 H21 Z M3,19 A2,2 0 0 0 5,21 H6 A2,2 0 0 0 8,19 V16 A2,2 0 0 0 6,14 H3 Z'); } catch (e) {}
   var FONT = 'system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,sans-serif';
   var RW = 1280, RH = 720, CW2 = 860, CH2 = 600, CX = (RW - CW2) / 2, CY = (RH - CH2) / 2, LS = 96, LY = CY + 44;
 
-  // Everything that only changes with the theme is painted once and reused for every frame,
-  // so drawing a frame stays cheap enough for a steady 60 fps.
   function paintStatic(c) {
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.fillStyle = css(pal.bg);
@@ -783,7 +764,6 @@ button.stop{background:var(--fill);color:var(--fg)}
           vopts.videoBitsPerSecond = cfg.vbr * 1000;
         }
         if (plan.mux) {
-          // video only; sound is encoded to MP3 from the PCM the PC sends
           r.mp3 = new HHMux.Mp3Encoder(cfg.sr, cfg.abr);
           r.wav = { rate: cfg.sr, frames: 0 };
           r.wav.put = function (d) { r.mp3.put(d); };
@@ -824,8 +804,6 @@ button.stop{background:var(--fill);color:var(--fg)}
     renderRec();
   }
 
-  // Starts a MediaRecorder with the next untried setting. If the browser refuses a setting
-  // (error, or no data arrives), retry() moves on to the following one.
   function launch(r) {
     while (r.ci < r.cfgs.length) {
       var cfg = r.cfgs[r.ci++], mr;
@@ -910,8 +888,6 @@ button.stop{background:var(--fill);color:var(--fg)}
     });
   }
 
-  // Builds the final MP4 / MKV: the recorded H.264 frames are copied untouched into a proper container
-  // together with the MP3 audio, with exact timestamps, keyframe index and duration.
   function finishMux(r, plan) {
     var raw = new Blob(r.chunks, { type: r.mime || 'video/webm' });
     return HHMux.parse(raw).then(HHMux.prepareVideo).then(function (v) {
@@ -945,8 +921,6 @@ button.stop{background:var(--fill);color:var(--fg)}
     download(url, name);
     setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
   }
-
-  // ---------- video settings dialog ----------
 
   var CFG = { fps: 30, abr: 192, sr: 44100, vbr: 6000 };
   var RECO = { fps: 30, abr: 192, sr: 44100 }, VBR_MIN = 500, VBR_MAX = 50000, VBR_DEF = 6000;
@@ -989,7 +963,6 @@ button.stop{background:var(--fill);color:var(--fg)}
     }
     vbrIn.value = CFG.vbr;
     vbrBox.className = 'num';
-    // The sample rate only applies when the page encodes the audio itself.
     $('gSr').hidden = !(PLAN[fmt] && PLAN[fmt].mux);
     placeSegs();
   }
@@ -1060,7 +1033,6 @@ button.stop{background:var(--fill);color:var(--fg)}
     else if (e.key === 'Enter' && e.target === vbrIn) confirmDialog();
   });
 
-  // The encoder and muxer are only fetched from the PC when a video recording is about to start.
   var muxP = null;
   function muxReady() { return !!(window.HHMux && window.lamejs); }
   function loadScript(src) {
@@ -1082,8 +1054,6 @@ button.stop{background:var(--fill);color:var(--fg)}
     else if (PLAN[fmt] && PLAN[fmt].video) openDialog();
     else startRecording();
   };
-
-  // ---------- frame loop ----------
 
   var t0 = performance.now(), prev = t0;
 
@@ -1115,8 +1085,6 @@ button.stop{background:var(--fill);color:var(--fg)}
     drawViz(g, cw, ch, k);
 
     if (rec && rec.vid && !rec.ending) {
-      // Paced against a running schedule (not "time since the last frame"), so a 60 Hz screen
-      // really delivers 60 fps instead of dropping to 30 whenever a frame arrives a hair early.
       var iv = 1000 / rec.fps;
       if (!rec.next) rec.next = now;
       if (now + 2 >= rec.next) {
